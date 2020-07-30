@@ -14,9 +14,12 @@ public class JmsSenderApplication {
 		ConfigurableApplicationContext context = SpringApplication.run(JmsSenderApplication.class, args);
 
 		JmsTemplate jmsQueueTemplate = BeanFactoryAnnotationUtils.qualifiedBeanOfType(context.getBeanFactory(), JmsTemplate.class, "jmsQueueTemplate");
+		jmsQueueTemplate.setExplicitQosEnabled(true);
+		jmsQueueTemplate.setDeliveryPersistent(false);
+		
 		JmsTemplate jmsTopicTemplate = BeanFactoryAnnotationUtils.qualifiedBeanOfType(context.getBeanFactory(), JmsTemplate.class, "jmsTopicTemplate");
-		jmsTopicTemplate.setTimeToLive(5000);
 		jmsTopicTemplate.setExplicitQosEnabled(true);
+		jmsTopicTemplate.setDeliveryPersistent(false);
 		
 		// Send a message with a POJO - the template reuse the message converter
 		while(true) {
