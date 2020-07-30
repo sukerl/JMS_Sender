@@ -1,28 +1,28 @@
 package com.example.demo;
 
+import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
-
-import com.example.demo.config.JmsConfig;
 
 @SpringBootApplication
 public class JmsSenderApplication {
 
 	public static void main(String[] args) {
-		// Launch the application
+
 		ConfigurableApplicationContext context = SpringApplication.run(JmsSenderApplication.class, args);
 
-		JmsTemplate jmsTemplate = context.getBean(JmsTemplate.class);
-		jmsTemplate.setConnectionFactory();
-		//jmsTemplate.setTimeToLive(60000);
+		JmsTemplate jmsQueueTemplate = BeanFactoryAnnotationUtils.qualifiedBeanOfType(context.getBeanFactory(), JmsTemplate.class, "jmsQueueTemplate");
+		JmsTemplate jmsTopicTemplate = BeanFactoryAnnotationUtils.qualifiedBeanOfType(context.getBeanFactory(), JmsTemplate.class, "jmsTopicTemplate");
+		jmsTopicTemplate.setTimeToLive(5000);
+		jmsTopicTemplate.setExplicitQosEnabled(true);
 		
 		// Send a message with a POJO - the template reuse the message converter
 		while(true) {
 			System.out.println("Sending an email message.");
-			jmsTemplate.convertAndSend("test.topic", new Email("info@example.com", "Hello"));
+			jmsQueueTemplate.convertAndSend("test.queue", new Email("info.queue@example.com", "Hello Queue"));
+			jmsTopicTemplate.convertAndSend("test.topic", new Email("info.topic@example.com", "Hello Topic"));
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
